@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the following paper."
+preferred-citation:
+  type: article
+  authors:
+    - family-names: Shapiro
+      given-names: Ben Rydal
+    - family-names: Hall
+      given-names: Rogers
+    - family-names: Owens
+      given-names: David
+  title: "Developing & Using Interaction Geography in a Museum"
+  journal: "International Journal of Computer-Supported Collaborative Learning"
+  volume: 12
+  issue: 4
+  start: 377
+  end: 399
+  year: 2017
+  doi: "10.1007/s11412-017-9264-8"

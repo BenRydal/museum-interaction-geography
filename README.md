@@ -1,8 +1,6 @@
 # Museum Interaction Geography
 
-An interactive data visualization exploring how families move through, talk in, and engage with museum gallery spaces. Built on **Interaction Geography** -- an approach extending Torsten Hagerstrand's time geography with learning sciences research to visualize collaborative human interaction across space and time.
-
-The visualization tracks **4 families (15 individuals)** visiting **3 gallery spaces** at a cultural heritage museum.
+An interactive data visualization exploring how families move through, talk in, and engage with museum gallery spaces. The visualization displays **4 families (15 individuals)** visiting **3 gallery spaces** at a cultural heritage museum.
 
 <p align="center">
   <img src="static/images/gallery_walkway.jpg" width="32%" alt="Walkway gallery" />
@@ -37,4 +35,4 @@ To build for production: `yarn build` -- outputs a fully static site to `build/`
 
 Copyright (C) 2018 Ben Rydal Shapiro. All rights reserved.
 
-Originally developed at Vanderbilt University as part of the dissertation [*Interaction Geography & the Learning Sciences*](https://etd.library.vanderbilt.edu/available/etd-03212018-140140/unrestricted/Shapiro_Dissertation.pdf).
+Originally developed at Vanderbilt University as part of the dissertation [_Interaction Geography & the Learning Sciences_](https://etd.library.vanderbilt.edu/available/etd-03212018-140140/unrestricted/Shapiro_Dissertation.pdf).
