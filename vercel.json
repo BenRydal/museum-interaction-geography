@@ -1,4 +1,4 @@
 {
-  "outputDirectory": ".",
-  "buildCommand": ""
+  "framework": "svelte",
+  "outputDirectory": "build"
 }
