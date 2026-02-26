@@ -2,11 +2,7 @@
 
 An interactive data visualization exploring how families move through, talk in, and engage with museum gallery spaces. Built on **Interaction Geography** -- an approach extending Torsten Hagerstrand's time geography with learning sciences research to visualize collaborative human interaction across space and time.
 
-The visualization tracks **4 families (15 individuals)** visiting **3 gallery spaces** at the Country Music Hall of Fame and Museum.
-
-<p align="center">
-  <video src="static/hero-bg.mp4" autoplay loop muted playsinline width="80%"></video>
-</p>
+The visualization tracks **4 families (15 individuals)** visiting **3 gallery spaces** at a cultural heritage museum.
 
 <p align="center">
   <img src="static/images/gallery_walkway.jpg" width="32%" alt="Walkway gallery" />
