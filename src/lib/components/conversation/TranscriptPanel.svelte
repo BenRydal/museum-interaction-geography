@@ -12,7 +12,6 @@
 	let dragOffsetY = 0;
 
 	const PANEL_W = 320;
-	const PANEL_H = 400;
 
 	onMount(() => {
 		if (panelState.panelX < 0 || panelState.panelY < 0) {
@@ -118,9 +117,7 @@
 		onpointermove={onPointerMove}
 		onpointerup={onPointerUp}
 	>
-		<span class="text-sm font-medium select-none">
-			{panelState.hoveredIndex !== null ? `Conversation ${panelState.hoveredIndex}` : 'Conversations'}
-		</span>
+		<span class="text-sm font-medium select-none">Conversations</span>
 		<button
 			class="flex h-5 w-5 items-center justify-center rounded text-gray-400 transition-colors hover:bg-gray-700 hover:text-white"
 			onclick={closePanel}

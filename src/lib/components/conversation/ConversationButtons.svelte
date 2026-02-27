@@ -10,12 +10,6 @@
 		space: number;
 	}
 
-	let w = $state(0);
-	let h = $state(0);
-	let hoveredIndex = $state<number | null>(null);
-
-	const textCache = new Map<number, string[]>();
-
 	// Conversation index ranges: RANGES[family][space] → [startIndex, endIndex]
 	const RANGES: Record<number, Record<number, [number, number]>> = {
 		0: { 0: [0, 9], 1: [10, 29], 2: [30, 38] },
@@ -24,10 +18,32 @@
 		3: { 0: [86, 89], 1: [90, 105] }
 	};
 
-	const ZOOM_SIZE = 14;
-	const ZOOM_GAP = 14;
-	const SM_SIZE = 7;
-	const SM_GAP = 7;
+	const ZOOM_SIZE = 16;
+	const ZOOM_GAP = 18;
+	const SM_SIZE = 9;
+	const SM_GAP = 11;
+	const MAX_PER_ROW = 10;
+
+	let w = $state(0);
+	let h = $state(0);
+	let hoveredIndex = $state<number | null>(null);
+	const textCache = new Map<number, string[]>();
+
+	// Clear locked conversation when family, space, or mode changes
+	let prevFamily = appState.family;
+	let prevSpace = appState.space;
+	let prevMode = appState.mode;
+
+	$effect(() => {
+		if (appState.family !== prevFamily || appState.space !== prevSpace || appState.mode !== prevMode) {
+			hoveredIndex = null;
+			unlock();
+			setBridge(false);
+		}
+		prevFamily = appState.family;
+		prevSpace = appState.space;
+		prevMode = appState.mode;
+	});
 
 	const isZoom = $derived(appState.view === 'zoom');
 
@@ -66,7 +82,16 @@
 		const gap = isZoom ? ZOOM_GAP : SM_GAP;
 		const size = isZoom ? ZOOM_SIZE : SM_SIZE;
 		const [baseX, baseY] = isZoom ? zoomBasePos(group.space) : smBasePos(group.family, group.space);
-		return { x: baseX + (index - group.startIndex) * gap, y: baseY, size };
+		const posInGroup = index - group.startIndex;
+
+		if (isZoom) {
+			return { x: baseX + posInGroup * gap, y: baseY, size };
+		}
+
+		const col = posInGroup % MAX_PER_ROW;
+		const row = Math.floor(posInGroup / MAX_PER_ROW);
+		const rowHeight = size + 4;
+		return { x: baseX + col * gap, y: baseY + row * rowHeight, size };
 	}
 
 	async function fetchText(index: number): Promise<string[]> {
@@ -146,22 +171,24 @@
 			<button
 				data-conversation-button
 				aria-label="Conversation {idx}"
-				class="pointer-events-auto fixed z-40 cursor-pointer rounded-full border transition-transform duration-100
-					{isActive
-					? 'scale-125 border-gray-700 bg-gray-800'
-					: 'border-gray-500 bg-transparent hover:scale-110 hover:border-gray-700'}"
+				class="pointer-events-auto fixed z-40 cursor-pointer transition-transform duration-100
+					{isActive ? 'scale-125' : 'hover:scale-110'}"
 				style="
 					left: {pos.x}px;
 					top: {pos.y}px;
 					width: {pos.size}px;
 					height: {pos.size}px;
 					transform: translate(-50%, -50%) {isActive ? 'scale(1.25)' : ''};
+					background: none; border: none; padding: 0;
 				"
 				onmouseenter={() => handleMouseEnter(idx)}
 				onmouseleave={handleMouseLeave}
 				onclick={handleClick}
-			></button>
+			>
+				<svg viewBox="0 0 20 18" width={pos.size} height={pos.size * 0.9} fill="none" stroke={isActive ? '#1f2937' : '#6b7280'} stroke-width="1.5">
+					<path d="M10 1C4.5 1 1 4 1 7.5c0 2 1 3.7 2.8 5L3 16l3.5-2c1.1.4 2.3.5 3.5.5 5.5 0 9-3 9-7S15.5 1 10 1z" />
+				</svg>
+			</button>
 		{/each}
-
 	{/each}
 {/if}
