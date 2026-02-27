@@ -123,7 +123,7 @@
 		8: '#214099'
 	};
 
-	const systemFont = `-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif`;
+	const uiFont = `'Inter', sans-serif`;
 </script>
 
 <style>
@@ -149,7 +149,7 @@
 			left: {groupCenterX}px;
 			top: {headerY}px;
 			transform: translateX(-50%);
-			font-family: {systemFont};
+			font-family: {uiFont};
 			font-size: clamp(8px, 0.85vw, 13px);
 			font-weight: 500;
 			color: {appState.view === 'zoom' && appState.family === family.id ? '#333' : '#888'};
@@ -169,7 +169,7 @@
 				left: {x}px;
 				top: {nameY}px;
 				transform: translateX(-50%);
-				font-family: {systemFont};
+				font-family: {uiFont};
 				font-size: clamp(9px, 0.85vw, 14px);
 				font-weight: 400;
 				color: {showing[member.idx] ? '#333' : '#999'};

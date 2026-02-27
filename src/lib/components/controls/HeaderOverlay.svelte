@@ -70,7 +70,7 @@
 					top: {galleryY(spaceId) + estimatedTextWidth / 2}px;
 					transform: rotate(-90deg);
 					transform-origin: left top;
-					font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+					font-family: 'Inter', sans-serif;
 					font-size: {fontSize}px;
 					font-weight: 500;
 					color: {appState.view === 'zoom' && appState.space === spaceId ? '#333' : '#bbb'};
