@@ -47,6 +47,9 @@
 	}
 </script>
 
+<!-- All UI overlays — hidden until fonts load (see app.html) -->
+<div data-ui-overlay>
+
 <!-- Header overlay: family headers, individual names, gallery labels, grid lines -->
 <HeaderOverlay />
 
@@ -88,5 +91,7 @@
 	<TranscriptPanel />
 {/if}
 
-<!-- Welcome overlay -->
+</div><!-- /data-ui-overlay -->
+
+<!-- Welcome overlay (outside font-gate so it shows immediately) -->
 <WelcomeOverlay visible={appState.welcome} ondismiss={dismissWelcome} />
