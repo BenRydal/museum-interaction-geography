@@ -96,7 +96,7 @@
 	<TranscriptPanel />
 {/if}
 
-</div><!-- /data-ui-overlay -->
-
-<!-- Welcome overlay (outside font-gate so it shows immediately) -->
+<!-- Welcome overlay -->
 <WelcomeOverlay visible={appState.welcome} ondismiss={dismissWelcome} />
+
+</div><!-- /data-ui-overlay -->
