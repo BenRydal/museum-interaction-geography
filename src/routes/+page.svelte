@@ -17,6 +17,11 @@
 	onMount(() => {
 		setupBridge();
 
+		// Reveal UI overlays once fonts are loaded and components are mounted
+		document.fonts.ready.then(() => {
+			document.body.classList.replace('fonts-loading', 'fonts-ready');
+		});
+
 		// Listen for p5 welcome toggle events (legacy bridge)
 		const welcomeHandler = (e: Event) => {
 			const visible = (e as CustomEvent).detail.visible;

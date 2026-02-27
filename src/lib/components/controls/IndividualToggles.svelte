@@ -137,6 +137,7 @@
 	}
 </style>
 
+{#if w > 0}
 {#each families as family}
 	{@const startX = familyX(family.id)}
 	{@const groupWidth = (family.members.length - 1) * nameGap}
@@ -183,3 +184,4 @@
 		</button>
 	{/each}
 {/each}
+{/if}
