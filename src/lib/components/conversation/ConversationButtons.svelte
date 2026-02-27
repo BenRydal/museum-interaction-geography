@@ -146,7 +146,7 @@
 			<button
 				data-conversation-button
 				aria-label="Conversation {idx}"
-				class="pointer-events-auto fixed z-40 rounded-full border transition-transform duration-100
+				class="pointer-events-auto fixed z-40 cursor-pointer rounded-full border transition-transform duration-100
 					{isActive
 					? 'scale-125 border-gray-700 bg-gray-800'
 					: 'border-gray-500 bg-transparent hover:scale-110 hover:border-gray-700'}"
@@ -163,18 +163,5 @@
 			></button>
 		{/each}
 
-		{#if isZoom}
-			{@const lastPos = getButtonPos(group, group.endIndex)}
-			<span
-				class="pointer-events-none fixed z-40 whitespace-nowrap text-sm text-black"
-				style="
-					left: {lastPos.x + ZOOM_GAP}px;
-					top: {lastPos.y}px;
-					transform: translateY(-50%);
-				"
-			>
-				Hover over buttons to read &amp; listen to conversation
-			</span>
-		{/if}
 	{/each}
 {/if}

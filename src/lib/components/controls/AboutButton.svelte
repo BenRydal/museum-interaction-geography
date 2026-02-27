@@ -10,6 +10,7 @@
 	style="font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 600; line-height: 1;"
 	onclick={() => setWelcome(!appState.welcome)}
 	aria-label="About"
+	title="About"
 >
 	?
 </button>

@@ -6,6 +6,7 @@
 	class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border-1.5 border-gray-400 bg-transparent text-gray-500 transition-colors duration-150 hover:border-gray-600 hover:text-gray-700"
 	onclick={() => setAnimate(!appState.animate)}
 	aria-label={appState.animate ? 'Pause animation' : 'Play animation'}
+	title={appState.animate ? 'Pause animation' : 'Play animation'}
 >
 	{#if appState.animate}
 		<!-- Pause icon (two bars) -->

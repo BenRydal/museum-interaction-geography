@@ -184,7 +184,7 @@
 				{/if}
 			{/each}
 		{:else}
-			<p class="text-sm italic text-gray-400">Hover over a conversation button to read the transcript</p>
+			<p class="text-sm italic text-gray-400">Hover over a conversation button to read and listen to conversation</p>
 		{/if}
 	</div>
 </div>
