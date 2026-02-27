@@ -14,12 +14,14 @@
 	import TranscriptPanel from '$lib/components/conversation/TranscriptPanel.svelte';
 	import { panelState, setPanelVisible } from '$lib/stores/conversationPanel.svelte';
 
+	let ready = $state(false);
+
 	onMount(() => {
 		setupBridge();
 
-		// Reveal UI overlays once fonts are loaded and components are mounted
+		// Wait for fonts before showing any UI
 		document.fonts.ready.then(() => {
-			document.body.classList.replace('fonts-loading', 'fonts-ready');
+			ready = true;
 		});
 
 		// Listen for p5 welcome toggle events (legacy bridge)
@@ -52,8 +54,7 @@
 	}
 </script>
 
-<!-- All UI overlays — hidden until fonts load (see app.html) -->
-<div data-ui-overlay>
+{#if ready}
 
 <!-- Header overlay: family headers, individual names, gallery labels, grid lines -->
 <HeaderOverlay />
@@ -99,4 +100,4 @@
 <!-- Welcome overlay -->
 <WelcomeOverlay visible={appState.welcome} ondismiss={dismissWelcome} />
 
-</div><!-- /data-ui-overlay -->
+{/if}
