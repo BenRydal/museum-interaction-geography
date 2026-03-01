@@ -130,16 +130,10 @@ export function resetAll() {
 }
 
 export function zoomInto(index: number) {
+	state.space = index < 4 ? 0 : index < 8 ? 1 : 2;
+	state.family = index % 4;
 	state.view = 'zoom';
 	(window as any)._igsEnsureZoomData?.();
 	(window as any)._igsZoomSelect?.(index);
 	syncToWindow();
-	// Read back family/space that p5 set
-	requestAnimationFrame(() => {
-		const ds = (window as any).displaySpace;
-		const df = (window as any).displayFamily;
-		if (ds !== undefined) state.space = ds;
-		if (df !== undefined) state.family = df;
-		syncToWindow();
-	});
 }

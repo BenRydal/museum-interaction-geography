@@ -26,13 +26,13 @@
 {#if visible}
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
-		class="fixed inset-0 z-[9999] flex items-center justify-center"
+		class="fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto"
 		style="background: rgba(15, 15, 15, 0.85); backdrop-filter: blur(8px);"
 		onclick={ondismiss}
 		onkeydown={handleKeydown}
 	>
 		<div
-			class="mx-4 max-w-[1000px] overflow-hidden rounded-2xl bg-white shadow-2xl"
+			class="mx-4 my-4 max-h-[calc(100vh-2rem)] max-w-[1000px] overflow-y-auto rounded-2xl bg-white shadow-2xl"
 			onclick={stop}
 		>
 			<!-- Gallery images as a hero strip -->
