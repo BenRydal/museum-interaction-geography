@@ -59,32 +59,32 @@
 <!-- Header overlay: family headers, individual names, gallery labels, grid lines -->
 <HeaderOverlay />
 
-<!-- Top-center: mode selector + view all -->
-<div class="pointer-events-auto fixed top-2 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2">
-	<ModeSelector />
-	{#if appState.view === 'zoom'}
-		<ViewToggle />
-	{/if}
-</div>
-
-<!-- Top-right icons: reset + conversation panel reopen + animation + about -->
-<div class="pointer-events-auto fixed top-2 right-3 z-50 flex items-center gap-2">
-	<ResetControls />
-	{#if appState.mode === 'talk' && !panelState.visible}
-		<button
-			class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border-1.5 border-gray-400 bg-transparent text-gray-500 transition-colors duration-150 hover:border-gray-600 hover:text-gray-700"
-			onclick={() => setPanelVisible(true)}
-			aria-label="Open transcript panel"
-			title="Open transcript panel"
-		>
-			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-			</svg>
-		</button>
-	{/if}
-	<AnimationToggle />
-	<AboutButton />
-</div>
+<!-- Navbar: mode selector centered, utility buttons on the right -->
+<nav class="pointer-events-auto fixed top-0 right-0 left-0 z-50 flex items-center justify-center border-b border-gray-200 bg-white/90 px-3 py-1.5 backdrop-blur-sm">
+	<div class="flex items-center gap-2">
+		<ModeSelector />
+		{#if appState.view === 'zoom'}
+			<ViewToggle />
+		{/if}
+	</div>
+	<div class="absolute right-3 flex items-center gap-2">
+		<ResetControls />
+		{#if appState.mode === 'talk' && !panelState.visible}
+			<button
+				class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border-1.5 border-gray-400 bg-transparent text-gray-500 transition-colors duration-150 hover:border-gray-600 hover:text-gray-700"
+				onclick={() => setPanelVisible(true)}
+				aria-label="Open transcript panel"
+				title="Open transcript panel"
+			>
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+				</svg>
+			</button>
+		{/if}
+		<AnimationToggle />
+		<AboutButton />
+	</div>
+</nav>
 
 <!-- Zoom buttons (small multiple view) -->
 <ZoomButtons />

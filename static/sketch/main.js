@@ -76,7 +76,7 @@ function preload() {
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
-    imageFileName = windowWidth > 900 ? "images/" : "lowImages/";
+    imageFileName = windowWidth > 900 ? "images/" : "small-images/";
     loadBaseImages();
     frameRate(30);
     positionButtons();

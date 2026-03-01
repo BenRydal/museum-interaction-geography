@@ -47,8 +47,10 @@
 	}
 
 	const nameGap = $derived(w / 30);
-	const headerY = $derived(h * 0.058);
-	const nameY = $derived(h * 0.08);
+	// Ensure toggles stay below the navbar (~44px tall)
+	const navbarHeight = 44;
+	const headerY = $derived(Math.max(h * 0.058, navbarHeight + 4));
+	const nameY = $derived(Math.max(h * 0.08, navbarHeight + 22));
 
 	interface Member {
 		idx: number;
