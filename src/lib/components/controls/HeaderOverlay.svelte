@@ -9,12 +9,11 @@
 	let h = $state(0);
 
 	onMount(() => {
-		w = window.innerWidth;
-		h = window.innerHeight;
 		const onResize = () => {
 			w = window.innerWidth;
 			h = window.innerHeight;
 		};
+		onResize();
 		window.addEventListener('resize', onResize);
 		return () => window.removeEventListener('resize', onResize);
 	});
@@ -25,64 +24,68 @@
 		{ name: 'ROTUNDA', spaceId: 2 }
 	];
 
-	// Gallery label Y center positions (centered in each gallery section)
-	function galleryY(id: number): number {
-		if (id === 0) return h * 0.30;
-		if (id === 1) return h * 0.57;
-		return h * 0.85;
-	}
+	const galleryYPct = [0.30, 0.57, 0.85];
 </script>
 
-<!-- Full-screen text overlay replacing baseGrid.png text -->
+<style>
+	.gallery-label {
+		position: absolute;
+		transform: rotate(-90deg);
+		transform-origin: left top;
+		pointer-events: auto;
+		font-family: 'Inter', sans-serif;
+		font-size: 12px;
+		font-weight: 500;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		white-space: nowrap;
+		padding: 3px 8px;
+		border: none;
+		border-radius: 5px;
+		background: transparent;
+		color: #aaa;
+		cursor: pointer;
+		transition: color 0.15s ease, background-color 0.15s ease;
+	}
+	.gallery-label:hover {
+		background-color: rgba(0, 0, 0, 0.06);
+		color: #666;
+	}
+	.gallery-label.active {
+		background-color: #333;
+		color: #fff;
+	}
+	.gallery-label.active:hover {
+		background-color: #444;
+		color: #fff;
+	}
+</style>
+
 {#if w > 0}
-<div class="pointer-events-none fixed inset-0 z-40" style="font-family: 'Playfair Display', serif;">
-	<!-- Individual toggles with family headers -->
+<div class="pointer-events-none fixed inset-0 z-40">
 	<IndividualToggles {navbarHeight} />
 
-	<!-- Vertical guide lines (matching original baseGrid.png) -->
+	<!-- Vertical guide lines -->
 	<div
 		class="absolute"
-		style="
-			left: {w * 0.02}px;
-			top: {h * 0.12}px;
-			width: 1.5px;
-			height: {h * 0.835}px;
-			background: #BCBEC0;
-		"
+		style="left: {w * 0.02}px; top: {h * 0.12}px; width: 1.5px; height: {h * 0.835}px; background: #BCBEC0;"
 	></div>
 	<div
 		class="absolute"
-		style="
-			left: {w * 0.025}px;
-			top: {h * 0.12}px;
-			width: 1px;
-			height: {h * 0.835}px;
-			background: rgba(35, 31, 32, 0.25);
-		"
+		style="left: {w * 0.025}px; top: {h * 0.12}px; width: 1px; height: {h * 0.835}px; background: rgba(35, 31, 32, 0.25);"
 	></div>
 
-	<!-- Gallery labels (left edge, vertical text, clickable to select space) -->
+	<!-- Gallery space labels -->
 	{#each galleries as { name, spaceId }}
-			{@const textWidth = name.length * 9}
-			<button
-				class="pointer-events-auto absolute cursor-pointer border-none bg-transparent p-0 transition-colors duration-150"
-				style="
-					left: {w * 0.005}px;
-					top: {galleryY(spaceId) + textWidth / 2}px;
-					transform: rotate(-90deg);
-					transform-origin: left top;
-					font-family: 'Inter', sans-serif;
-					font-size: 12px;
-					font-weight: 500;
-					color: {appState.view === 'zoom' && appState.space === spaceId ? '#333' : '#bbb'};
-					letter-spacing: 0.12em;
-					text-transform: uppercase;
-					white-space: nowrap;
-				"
-				onclick={() => setSpace(spaceId)}
-			>
-				{name}
-			</button>
-		{/each}
+		{@const textWidth = name.length * 9}
+		<button
+			class="gallery-label"
+			class:active={appState.view === 'zoom' && appState.space === spaceId}
+			style="left: {w * 0.005}px; top: {h * galleryYPct[spaceId] + textWidth / 2}px;"
+			onclick={() => setSpace(spaceId)}
+		>
+			{name}
+		</button>
+	{/each}
 </div>
 {/if}

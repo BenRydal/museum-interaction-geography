@@ -3,19 +3,14 @@
 
 	let { navbarHeight = 0 }: { navbarHeight?: number } = $props();
 
-	// Track which individuals are showing by reading p5 state
 	let showing = $state(Array(15).fill(false));
 
-	// Poll p5 state to stay in sync
 	$effect(() => {
 		const interval = setInterval(() => {
 			const mapMovement = (window as any).mapMovement;
-			if (mapMovement) {
-				for (let i = 0; i < 15; i++) {
-					if (mapMovement[i] && mapMovement[i].show !== undefined) {
-						showing[i] = mapMovement[i].show === true;
-					}
-				}
+			if (!mapMovement) return;
+			for (let i = 0; i < 15; i++) {
+				showing[i] = mapMovement[i]?.show === true;
 			}
 		}, 100);
 		return () => clearInterval(interval);
@@ -33,7 +28,6 @@
 		members: Member[];
 	}
 
-	// Center positions matching visualization columns (from ZoomButtons.svelte)
 	const familyCenterPct = ['14.64%', '38.24%', '62.70%', '87.34%'];
 
 	const families: Family[] = [
@@ -79,12 +73,16 @@
 	];
 
 	const colors: Record<number, string> = {
-		0: '#F26522', 9: '#F26522', 12: '#F26522',  // orange
-		1: '#FFDE17', 5: '#FFDE17', 11: '#FFDE17',  // yellow
-		2: '#00A14B', 7: '#00A14B', 13: '#00A14B',  // green
-		3: '#7F3F98', 6: '#7F3F98', 10: '#7F3F98', 14: '#7F3F98', // purple
-		4: '#214099', 8: '#214099'                    // blue
+		0: '#F26522', 9: '#F26522', 12: '#F26522',
+		1: '#FFDE17', 5: '#FFDE17', 11: '#FFDE17',
+		2: '#00A14B', 7: '#00A14B', 13: '#00A14B',
+		3: '#7F3F98', 6: '#7F3F98', 10: '#7F3F98', 14: '#7F3F98',
+		4: '#214099', 8: '#214099'
 	};
+
+	function isFamilyActive(id: number): boolean {
+		return appState.view === 'zoom' && appState.family === id;
+	}
 </script>
 
 <style>
@@ -95,6 +93,19 @@
 		right: 0;
 		pointer-events: none;
 		font-family: 'Inter', sans-serif;
+	}
+	.frosted-bar {
+		position: absolute;
+		inset: 0;
+		background: rgba(255, 255, 255, 0.6);
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+		pointer-events: none;
+	}
+	.toggles-inner {
+		position: relative;
+		z-index: 1;
+		padding: 6px 0;
 	}
 	.family-group {
 		position: absolute;
@@ -108,59 +119,98 @@
 		font-size: 13px;
 		font-weight: 500;
 		letter-spacing: 0.08em;
+		color: #888;
 		background: transparent;
 		border: none;
-		padding: 0;
+		padding: 2px 8px;
 		margin-bottom: 2px;
 		cursor: pointer;
 		white-space: nowrap;
+		border-radius: 6px;
+		transition: background-color 0.15s ease, color 0.15s ease;
+	}
+	.family-header:hover {
+		background-color: rgba(0, 0, 0, 0.05);
+	}
+	.family-header.active {
+		background-color: #333;
+		color: #fff;
+	}
+	.family-header.active:hover {
+		background-color: #444;
 	}
 	.names-row {
 		display: flex;
-		gap: 0.6rem;
+		gap: 0.4rem;
 	}
 	.individual-btn {
 		font-size: 13px;
 		font-weight: 400;
+		color: #999;
 		background: transparent;
 		border: none;
-		padding: 0 0 2px;
-		border-bottom: 2px solid transparent;
+		padding: 2px 2px 3px;
 		cursor: pointer;
 		white-space: nowrap;
-		transition: color 0.15s ease, border-color 0.15s ease;
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		transition: color 0.15s ease;
 	}
 	.individual-btn:hover {
 		color: #333 !important;
 	}
+	.individual-btn.showing {
+		color: #333;
+	}
+	.dot {
+		width: 7px;
+		height: 7px;
+		border-radius: 50%;
+		flex-shrink: 0;
+		opacity: 0.25;
+		transition: opacity 0.15s ease;
+	}
+	.dot.visible {
+		opacity: 1;
+	}
+	sup {
+		font-size: 0.65em;
+		vertical-align: super;
+	}
 </style>
 
 <div class="toggles-container" style="top: {navbarHeight + 4}px;">
-	{#each families as family}
-		<div class="family-group" style="left: {familyCenterPct[family.id]};">
-			<button
-				class="family-header"
-				style="color: {appState.view === 'zoom' && appState.family === family.id ? '#333' : '#888'};"
-				onclick={() => setFamily(family.id)}
-			>
-				{family.name}
-			</button>
+	<div class="frosted-bar"></div>
+	<div class="toggles-inner">
+		{#each families as family}
+			<div class="family-group" style="left: {familyCenterPct[family.id]};">
+				<button
+					class="family-header"
+					class:active={isFamilyActive(family.id)}
+					onclick={() => setFamily(family.id)}
+				>
+					{family.name}
+				</button>
 
-			<div class="names-row">
-				{#each family.members as member}
-					<button
-						class="individual-btn"
-						style="
-							color: {showing[member.idx] ? '#333' : '#999'};
-							border-bottom-color: {showing[member.idx] ? colors[member.idx] : 'transparent'};
-						"
-						title="{member.name} ({member.sup})"
-						onclick={() => toggleIndividual(member.idx)}
-					>
-						{member.name}<sup style="font-size: 0.65em; vertical-align: super;">{member.sup}</sup>
-					</button>
-				{/each}
+				<div class="names-row">
+					{#each family.members as member}
+						<button
+							class="individual-btn"
+							class:showing={showing[member.idx]}
+							title="{member.name} ({member.sup})"
+							onclick={() => toggleIndividual(member.idx)}
+						>
+							<span
+								class="dot"
+								class:visible={showing[member.idx]}
+								style="background-color: {colors[member.idx]};"
+							></span>
+							{member.name}<sup>{member.sup}</sup>
+						</button>
+					{/each}
+				</div>
 			</div>
-		</div>
-	{/each}
+		{/each}
+	</div>
 </div>
