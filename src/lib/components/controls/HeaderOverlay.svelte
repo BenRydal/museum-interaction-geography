@@ -63,20 +63,20 @@
 
 	<!-- Gallery labels (left edge, vertical text, clickable to select space) -->
 	{#each galleries as { name, spaceId }}
-			{@const fontSize = Math.max(8, w * 0.008)}
-			{@const estimatedTextWidth = name.length * fontSize * 0.75}
+			{@const textWidth = name.length * 9}
 			<button
 				class="pointer-events-auto absolute cursor-pointer border-none bg-transparent p-0 transition-colors duration-150"
 				style="
 					left: {w * 0.005}px;
-					top: {galleryY(spaceId) + estimatedTextWidth / 2}px;
+					top: {galleryY(spaceId) + textWidth / 2}px;
 					transform: rotate(-90deg);
 					transform-origin: left top;
 					font-family: 'Inter', sans-serif;
-					font-size: {fontSize}px;
+					font-size: 12px;
 					font-weight: 500;
 					color: {appState.view === 'zoom' && appState.space === spaceId ? '#333' : '#bbb'};
 					letter-spacing: 0.12em;
+					text-transform: uppercase;
 					white-space: nowrap;
 				"
 				onclick={() => setSpace(spaceId)}

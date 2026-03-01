@@ -1,26 +1,10 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { appState, toggleIndividual, setFamily } from '$lib/stores/appState.svelte';
 
 	let { navbarHeight = 0 }: { navbarHeight?: number } = $props();
 
 	// Track which individuals are showing by reading p5 state
 	let showing = $state(Array(15).fill(false));
-
-	// Window dimensions for positioning (matches p5 canvas)
-	let w = $state(0);
-	let h = $state(0);
-
-	onMount(() => {
-		w = window.innerWidth;
-		h = window.innerHeight;
-		const onResize = () => {
-			w = window.innerWidth;
-			h = window.innerHeight;
-		};
-		window.addEventListener('resize', onResize);
-		return () => window.removeEventListener('resize', onResize);
-	});
 
 	// Poll p5 state to stay in sync
 	$effect(() => {
@@ -33,24 +17,9 @@
 					}
 				}
 			}
-			// View mode sync: p5 → Svelte is handled via igsStateSync events
-			// (dispatched by overZoomButton in gui.js), not polling, to avoid race conditions
 		}, 100);
 		return () => clearInterval(interval);
 	});
-
-	// Family starting X positions — shifted right to center over visualizations
-	const xOffset = $derived(w * 0.018);
-	function familyX(familyIdx: number): number {
-		if (familyIdx === 0) return w / 15 + xOffset;
-		if (familyIdx === 1) return w / 3.15 + xOffset;
-		if (familyIdx === 2) return w / 1.68 + xOffset;
-		return w / 1.24 + xOffset;
-	}
-
-	const nameGap = $derived(w / 30);
-	const headerY = $derived(Math.max(h * 0.058, navbarHeight + 4));
-	const nameY = $derived(Math.max(h * 0.08, navbarHeight + 22));
 
 	interface Member {
 		idx: number;
@@ -63,6 +32,9 @@
 		name: string;
 		members: Member[];
 	}
+
+	// Center positions matching visualization columns (from ZoomButtons.svelte)
+	const familyCenterPct = ['14.64%', '38.24%', '62.70%', '87.34%'];
 
 	const families: Family[] = [
 		{
@@ -106,84 +78,89 @@
 		}
 	];
 
-	// Color map: individual index → hex color
 	const colors: Record<number, string> = {
-		0: '#F26522',
-		9: '#F26522',
-		12: '#F26522',
-		1: '#FFDE17',
-		5: '#FFDE17',
-		11: '#FFDE17',
-		2: '#00A14B',
-		7: '#00A14B',
-		13: '#00A14B',
-		3: '#7F3F98',
-		6: '#7F3F98',
-		10: '#7F3F98',
-		14: '#7F3F98',
-		4: '#214099',
-		8: '#214099'
+		0: '#F26522', 9: '#F26522', 12: '#F26522',  // orange
+		1: '#FFDE17', 5: '#FFDE17', 11: '#FFDE17',  // yellow
+		2: '#00A14B', 7: '#00A14B', 13: '#00A14B',  // green
+		3: '#7F3F98', 6: '#7F3F98', 10: '#7F3F98', 14: '#7F3F98', // purple
+		4: '#214099', 8: '#214099'                    // blue
 	};
-
-	const uiFont = `'Inter', sans-serif`;
 </script>
 
 <style>
+	.toggles-container {
+		position: fixed;
+		z-index: 50;
+		left: 0;
+		right: 0;
+		pointer-events: none;
+		font-family: 'Inter', sans-serif;
+	}
+	.family-group {
+		position: absolute;
+		transform: translateX(-50%);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		pointer-events: auto;
+	}
+	.family-header {
+		font-size: 13px;
+		font-weight: 500;
+		letter-spacing: 0.08em;
+		background: transparent;
+		border: none;
+		padding: 0;
+		margin-bottom: 2px;
+		cursor: pointer;
+		white-space: nowrap;
+	}
+	.names-row {
+		display: flex;
+		gap: 0.6rem;
+	}
 	.individual-btn {
-		transition: color 0.15s ease, border-color 0.15s ease;
-		padding-bottom: 2px;
+		font-size: 13px;
+		font-weight: 400;
+		background: transparent;
+		border: none;
+		padding: 0 0 2px;
 		border-bottom: 2px solid transparent;
+		cursor: pointer;
+		white-space: nowrap;
+		transition: color 0.15s ease, border-color 0.15s ease;
 	}
 	.individual-btn:hover {
 		color: #333 !important;
 	}
 </style>
 
-{#if w > 0}
-{#each families as family}
-	{@const startX = familyX(family.id)}
-	{@const groupWidth = (family.members.length - 1) * nameGap}
-	{@const groupCenterX = startX + groupWidth / 2}
+<div class="toggles-container" style="top: {navbarHeight + 4}px;">
+	{#each families as family}
+		<div class="family-group" style="left: {familyCenterPct[family.id]};">
+			<button
+				class="family-header"
+				style="color: {appState.view === 'zoom' && appState.family === family.id ? '#333' : '#888'};"
+				onclick={() => setFamily(family.id)}
+			>
+				{family.name}
+			</button>
 
-	<!-- Family header (clickable to select family) -->
-	<button
-		class="pointer-events-auto fixed z-50 cursor-pointer border-none bg-transparent p-0"
-		style="
-			left: {groupCenterX}px;
-			top: {headerY}px;
-			transform: translateX(-50%);
-			font-family: {uiFont};
-			font-size: clamp(8px, 0.85vw, 13px);
-			font-weight: 500;
-			color: {appState.view === 'zoom' && appState.family === family.id ? '#333' : '#888'};
-			letter-spacing: 0.08em;
-		"
-		onclick={() => setFamily(family.id)}
-	>
-		{family.name}
-	</button>
-
-	<!-- Individual name buttons -->
-	{#each family.members as member, memberIdx}
-		{@const x = startX + memberIdx * nameGap}
-		<button
-			class="individual-btn pointer-events-auto fixed z-50 cursor-pointer bg-transparent p-0"
-			style="
-				left: {x}px;
-				top: {nameY}px;
-				transform: translateX(-50%);
-				font-family: {uiFont};
-				font-size: clamp(9px, 0.85vw, 14px);
-				font-weight: 400;
-				color: {showing[member.idx] ? '#333' : '#999'};
-				border-bottom-color: {showing[member.idx] ? colors[member.idx] : 'transparent'};
-				white-space: nowrap;
-			"
-			title="{member.name} ({member.sup})"
-			onclick={() => toggleIndividual(member.idx)}
-		>
-			{member.name}<sup style="font-size: 0.65em; vertical-align: super;">{member.sup}</sup>
-		</button>
+			<div class="names-row">
+				{#each family.members as member}
+					<button
+						class="individual-btn"
+						style="
+							color: {showing[member.idx] ? '#333' : '#999'};
+							border-bottom-color: {showing[member.idx] ? colors[member.idx] : 'transparent'};
+						"
+						title="{member.name} ({member.sup})"
+						onclick={() => toggleIndividual(member.idx)}
+					>
+						{member.name}<sup style="font-size: 0.65em; vertical-align: super;">{member.sup}</sup>
+					</button>
+				{/each}
+			</div>
+		</div>
 	{/each}
-{/each}
-{/if}
+</div>
