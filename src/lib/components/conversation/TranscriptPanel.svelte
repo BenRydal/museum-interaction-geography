@@ -66,6 +66,7 @@
 	}
 
 	function onPointerDown(e: PointerEvent) {
+		if ((e.target as HTMLElement).closest('button')) return;
 		dragging = true;
 		(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
 		dragOffsetX = e.clientX - panelState.panelX;

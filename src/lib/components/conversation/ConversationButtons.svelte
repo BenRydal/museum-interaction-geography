@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { appState } from '$lib/stores/appState.svelte';
-	import { panelState, setHover, clearHover, lockHover, unlock } from '$lib/stores/conversationPanel.svelte';
+	import { panelState, setHover, clearHover, lockHover, unlock, setPanelVisible } from '$lib/stores/conversationPanel.svelte';
 
 	interface ButtonGroup {
 		startIndex: number;
@@ -141,6 +141,7 @@
 		const target = e.target as HTMLElement;
 		if (target.closest('[data-conversation-button]') || target.closest('[data-transcript-panel]')) return;
 		unlock();
+		setPanelVisible(false);
 		setBridge(false);
 	}
 

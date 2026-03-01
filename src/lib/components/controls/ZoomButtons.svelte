@@ -15,7 +15,7 @@
 {#if appState.view === 'smallMultiple'}
 	{#each cells as { row, col, index }}
 		<button
-			class="pointer-events-auto fixed z-50 cursor-pointer bg-transparent transition-colors duration-150 hover:bg-white/10"
+			class="pointer-events-auto fixed z-30 cursor-pointer bg-transparent transition-colors duration-150 hover:bg-white/10"
 			style="
 				left: {col * 25}%;
 				top: {rowTops[row]}%;
