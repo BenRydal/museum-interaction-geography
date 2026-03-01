@@ -1,121 +1,103 @@
 function DrawZoom() {
 
-    // draws base images (grid or plan) for zoom then sends to drawMovementZoom, drawTalkZoom or drawCurationZoom()
+    var grids = [
+        [grid_Walkway, plan_Walkway],
+        [grid_Bluegrass, plan_Bluegrass],
+        [grid_Rotunda, plan_Rotunda]
+    ];
+
+    var grayScales = [
+        [grayScale_00, grayScale_01, grayScale_02, grayScale_03],
+        [grayScale_10, grayScale_11, grayScale_12, grayScale_13],
+        [grayScale_20, grayScale_21, grayScale_22]
+    ];
+
+    var conversationBoxes = [
+        [conversationBoxes_00, conversationBoxes_01, conversationBoxes_02, conversationBoxes_03],
+        [conversationBoxes_10, conversationBoxes_11, conversationBoxes_12, conversationBoxes_13],
+        [conversationBoxes_20, conversationBoxes_21, conversationBoxes_22]
+    ];
+
+    // Per-individual: which spaces have curation data (used in drawCurationZoom)
+    // walkway: not 0, 1, 5, 8, 14;  bluegrass: not 1, 7;  rotunda: not 6, 8, 11, 13, 14
+    var noWalkwayCuration = [0, 1, 5, 8, 14];
+    var noBluegrassCuration = [1, 7];
+    var noRotundaCuration = [6, 8, 11, 13, 14];
+
     this.draw = function () {
         noFill();
         stroke(125);
         strokeWeight(1);
 
         // Draw base image for selected space
-        if (displaySpace == 0) {
-            if (talk) image(plan_Walkway, 0, 0, width, height);
-            else image(grid_Walkway, 0, 0, width, height);
-        } else if (displaySpace == 1) {
-            if (talk) image(plan_Bluegrass, 0, 0, width, height);
-            else image(grid_Bluegrass, 0, 0, width, height);
-        } else if (displaySpace == 2) {
-            if (talk) image(plan_Rotunda, 0, 0, width, height);
-            else image(grid_Rotunda, 0, 0, width, height);
-        }
+        var pair = grids[displaySpace];
+        if (pair) image(talk ? pair[1] : pair[0], 0, 0, width, height);
 
         if (movement) drawMovementZoom();
         else if (talk) {
             drawTalkZoom();
-            readConversationBridge(); // Svelte controls hover; p5 draws box images
+            readConversationBridge();
             if (!locked) drawConversationZoom();
         } else if (curation) drawCurationZoom();
     }
 
-    // Read Svelte conversation hover bridge and draw conversationBoxZoom image if active
     function readConversationBridge() {
         var hover = window._igsConversationHover;
         if (hover && hover.active) {
             var i = hover.index;
-            if (mapConversation[i] !== -1 && mapConversation[i] !== undefined && mapConversation[i] !== null) {
+            if (mapConversation[i] && mapConversation[i] !== -1) {
                 locked = true;
                 image(mapConversation[i].conversationBoxZoom, 0, 0, width, height);
             }
         }
     }
 
-    // draw zoom Movement paths
+    function hasRotunda(i) {
+        return noRotundaIndividuals.indexOf(i) === -1;
+    }
+
+    function getSelectedSpaceImage(zoomData, i) {
+        if (mapZoomMovement[i].selectWalkway) return zoomData.movementWalkway;
+        if (mapZoomMovement[i].selectBluegrass) return zoomData.movementBluegrass;
+        if (mapZoomMovement[i].selectRotunda && hasRotunda(i)) return zoomData.movementRotunda;
+        return null;
+    }
+
     function drawMovementZoom() {
-        var i;
-        for (i = 0; i < individualLength; i++) {
-            if (mapMovement[i].show) {                if (mapZoomMovement[i].selectWalkway) {
-                    image(mapZoomMovement[i].movementWalkway, 0, 0, width, height);
-                } else if (mapZoomMovement[i].selectBluegrass) {
-                    image(mapZoomMovement[i].movementBluegrass, 0, 0, width, height);
-                } else if (mapZoomMovement[i].selectRotunda == true && i !== 3 && i < 11) {
-                    image(mapZoomMovement[i].movementRotunda, 0, 0, width, height);
-                }
-            }
+        for (var i = 0; i < individualLength; i++) {
+            if (!mapMovement[i].show || mapZoomMovement[i] === -1) continue;
+            var img = getSelectedSpaceImage(mapZoomMovement[i], i);
+            if (img) image(img, 0, 0, width, height);
         }
     }
 
-    // draws talkBlocks
     function drawTalkZoom() {
-        var i;
-        if (displaySpace == 0) {
-            if (displayFamily == 0) image(grayScale_00, 0, 0, width, height);
-            else if (displayFamily == 1) image(grayScale_01, 0, 0, width, height);
-            else if (displayFamily == 2) image(grayScale_02, 0, 0, width, height);
-            else if (displayFamily == 3) image(grayScale_03, 0, 0, width, height);
-        } else if (displaySpace == 1) {
-            if (displayFamily == 0) image(grayScale_10, 0, 0, width, height);
-            else if (displayFamily == 1) image(grayScale_11, 0, 0, width, height);
-            else if (displayFamily == 2) image(grayScale_12, 0, 0, width, height);
-            else if (displayFamily == 3) image(grayScale_13, 0, 0, width, height);
-        } else if (displaySpace == 2) {
-            if (displayFamily == 0) image(grayScale_20, 0, 0, width, height);
-            else if (displayFamily == 1) image(grayScale_21, 0, 0, width, height);
-            else if (displayFamily == 2) image(grayScale_22, 0, 0, width, height);
-        }
-        for (i = 0; i < individualLength; i++) {
-            if (mapMovement[i].show) {                if (mapZoomMovement[i].selectWalkway) {
-                    image(mapZoomTalk[i].movementWalkway, 0, 0, width, height);
-                } else if (mapZoomMovement[i].selectBluegrass) {
-                    image(mapZoomTalk[i].movementBluegrass, 0, 0, width, height);
-                } else if (mapZoomMovement[i].selectRotunda == true && i !== 3 && i < 11) {
-                    image(mapZoomTalk[i].movementRotunda, 0, 0, width, height);
-                }
-            }
+        var row = grayScales[displaySpace];
+        if (row && row[displayFamily]) image(row[displayFamily], 0, 0, width, height);
+
+        for (var i = 0; i < individualLength; i++) {
+            if (!mapMovement[i].show || mapZoomMovement[i] === -1 || mapZoomTalk[i] === -1) continue;
+            var img = getSelectedSpaceImage(mapZoomTalk[i], i);
+            if (img) image(img, 0, 0, width, height);
         }
     }
 
-    // draws conversation boxes for selected space and family in zoom mode. Uses displaySpace and displayFamily variables
     function drawConversationZoom() {
-        if (displaySpace == 0) {
-            if (displayFamily == 0) image(conversationBoxes_00, 0, 0, width, height);
-            else if (displayFamily == 1) image(conversationBoxes_01, 0, 0, width, height);
-            else if (displayFamily == 2) image(conversationBoxes_02, 0, 0, width, height);
-            else if (displayFamily == 3) image(conversationBoxes_03, 0, 0, width, height);
-        } else if (displaySpace == 1) {
-            if (displayFamily == 0) image(conversationBoxes_10, 0, 0, width, height);
-            else if (displayFamily == 1) image(conversationBoxes_11, 0, 0, width, height);
-            else if (displayFamily == 2) image(conversationBoxes_12, 0, 0, width, height);
-            else if (displayFamily == 3) image(conversationBoxes_13, 0, 0, width, height);
-        } else if (displaySpace == 2) {
-            if (displayFamily == 0) image(conversationBoxes_20, 0, 0, width, height);
-            else if (displayFamily == 1) image(conversationBoxes_21, 0, 0, width, height);
-            else if (displayFamily == 2) image(conversationBoxes_22, 0, 0, width, height);
-        }
+        var row = conversationBoxes[displaySpace];
+        if (row && row[displayFamily]) image(row[displayFamily], 0, 0, width, height);
     }
 
-    // draws curation paths
     function drawCurationZoom() {
-        var i;
-        for (i = 0; i < individualLength; i++) {
-            if (i == 2 || i == 3 || i == 4 || i == 12) {
-                continue;
-            } else if (mapMovement[i].show) {                // !i indicates spaces where there is no curation
-                if (mapZoomMovement[i].selectWalkway == true) {
-                    if (i !== 0 && i !== 1 && i !== 8 && i !== 14 && i !== 5) image(mapZoomCuration[i].movementWalkway, 0, 0, width, height);
-                } else if (mapZoomMovement[i].selectBluegrass == true) {
-                    if (i !== 1 && i !== 7) image(mapZoomCuration[i].movementBluegrass, 0, 0, width, height);
-                } else if (mapZoomMovement[i].selectRotunda == true) {
-                    if (i !== 8 && i !== 14 && i !== 6 && i !== 11 && i !== 13) image(mapZoomCuration[i].movementRotunda, 0, 0, width, height);
-                }
+        for (var i = 0; i < individualLength; i++) {
+            if (noCurationIndividuals.indexOf(i) !== -1) continue;
+            if (!mapMovement[i].show || mapZoomMovement[i] === -1 || mapZoomCuration[i] === -1 || mapZoomCuration[i] === 1) continue;
+
+            if (mapZoomMovement[i].selectWalkway && noWalkwayCuration.indexOf(i) === -1) {
+                image(mapZoomCuration[i].movementWalkway, 0, 0, width, height);
+            } else if (mapZoomMovement[i].selectBluegrass && noBluegrassCuration.indexOf(i) === -1) {
+                image(mapZoomCuration[i].movementBluegrass, 0, 0, width, height);
+            } else if (mapZoomMovement[i].selectRotunda && noRotundaCuration.indexOf(i) === -1) {
+                image(mapZoomCuration[i].movementRotunda, 0, 0, width, height);
             }
         }
     }

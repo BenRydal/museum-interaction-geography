@@ -4,16 +4,12 @@
  * https://etd.library.vanderbilt.edu/available/etd-03212018-140140/unrestricted/Shapiro_Dissertation.pdf
  */
 
-// For high res or low res screens
 var imageFileName;
+var individualLength = 15;
 
-// Array Lengths
-var individualLength = 15,
-    conversationLength = 106;
-
-// Hash for data
-var mapConversation = []; // conversationLength
-var mapMovement = [], // individualLength for all
+// Per-individual data arrays
+var mapConversation = [];
+var mapMovement = [],
     mapTalk = [],
     mapCuration = [],
     mapZoomMovement = [],
@@ -28,31 +24,18 @@ var movement = true,
     talk = false,
     curation = false;
 
-// ********* GUI *********
-var font_PlayfairReg; // font
-var conversationAudioNumber = -1; // Constant for preventing audio repeating
+var font_PlayfairReg;
 
 // Interface variables
 var locked = false,
     zoomView = true,
-    grayScaleToggle = true,
-    welcome = true, // Controls welcome message/information on hover
-    intro = true; // Controls opening selection of Blake/Adhir
+    welcome = true,
+    intro = true;
 
 // Animation variables
 var reveal = 0,
     fillColor = 255,
-    animate = true,
-    fullScreenTransition = false;
-
-// Conversation button variables
-var conversationButtonSize = 7,
-    conversationButtonSizeZoom = 14,
-    conversationButtonGap = 7,
-    conversationButtonGapZoom = 14;
-
-// Conversation button positions
-var conversationButtonY, conversationButtonX, yPosWalkway, yPosBluegrass, yPosRotunda, xPosButtonBluegrass, xPosButtonGayle, xPosButtonBusiness, xPosButtonMom;
+    animate = true;
 
 // Current space and family selection
 var displaySpace = 1,
@@ -61,7 +44,11 @@ var displaySpace = 1,
 // Timeline animation variables
 var timelineStartWalkway, timelineStartBluegrass, timelineStartRotunda;
 
-// Classes
+// Individuals with no curation data
+var noCurationIndividuals = [2, 3, 4, 12];
+// Individuals with no rotunda data
+var noRotundaIndividuals = [3, 11, 12, 13, 14];
+
 function Conversation(convo, box, boxZoom, audio) {
     this.conversationText = convo;
     this.conversationBox = box;
@@ -69,12 +56,11 @@ function Conversation(convo, box, boxZoom, audio) {
     this.conversationAudio = audio;
 }
 
-function movementPath(movement, view) {
+function movementPath(movement, show) {
     this.movement = movement;
-    this.show = view;
+    this.show = show;
 }
 
-// Primary class to control GUI using movement
 function movementZoom(walkway, bluegrass, rotunda, selectWalkway, selectBluegrass, selectRotunda) {
     this.movementWalkway = walkway;
     this.movementBluegrass = bluegrass;
@@ -84,20 +70,13 @@ function movementZoom(walkway, bluegrass, rotunda, selectWalkway, selectBluegras
     this.selectRotunda = selectRotunda;
 }
 
-function talkCurationZoom(walkway, bluegrass, rotunda) {
-    this.movementWalkway = walkway;
-    this.movementBluegrass = bluegrass;
-    this.movementRotunda = rotunda;
-}
-
 function preload() {
     loadBlankDataArrays();
 }
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
-    if (windowWidth > 900) imageFileName = "images/"; // high density displays
-    else imageFileName = "lowImages/"; // low density displays
+    imageFileName = windowWidth > 900 ? "images/" : "lowImages/";
     loadBaseImages();
     frameRate(30);
     positionButtons();
@@ -105,9 +84,7 @@ function setup() {
     textFont(font_PlayfairReg, 18);
 }
 
-// sets drawing canvas, organizes drawing in 2 views (zoom or not zoom), sets animation
 function draw() {
-    // Read from Svelte store bridge
     var s = window._igsState;
     if (s) {
         zoomView = s.view === 'zoom';
@@ -121,15 +98,12 @@ function draw() {
     }
 
     background(255);
-    var drawingSurface;
-    locked = false; // resets locked
+    locked = false;
     noStroke();
     if (zoomView) {
-        drawingSurface = new DrawZoom();
-        drawingSurface.draw();
-    } else if (!zoomView) {
-        drawingSurface = new DrawSmallMultiple();
-        drawingSurface.draw();
+        new DrawZoom().draw();
+    } else {
+        new DrawSmallMultiple().draw();
     }
     setUpAnimation();
 }
@@ -139,131 +113,133 @@ function windowResized() {
     positionButtons();
 }
 
-
 function loadBlankDataArrays() {
-    var noData = -1;
-    var path = new movementPath(noData, false);
-    // load individual length arrays
+    var blankPath = new movementPath(-1, false);
     for (var i = 0; i < 15; i++) {
-        mapMovement.push(path);
-        mapTalk.push(noData);
-        mapCuration.push(noData);
-        mapZoomMovement.push(noData);
-        mapZoomTalk.push(noData);
-        mapZoomCuration.push(noData);
+        mapMovement.push(blankPath);
+        mapTalk.push(-1);
+        mapCuration.push(-1);
+        mapZoomMovement.push(-1);
+        mapZoomTalk.push(-1);
+        mapZoomCuration.push(-1);
     }
-    // load conversation length array
     for (var i = 0; i < 106; i++) {
-        mapConversation.push(noData);
+        mapConversation.push(-1);
     }
+}
+
+function img(name) {
+    return loadImage(imageFileName + name);
 }
 
 function loadDataSmallMultiple(i) {
-    var path;
-    var block;
-    var curPath;
-    var curPathZoom;
-    path = new movementPath(loadImage(imageFileName + i + "_movement.png"), true);
-    // mapMovement[i].movement = loadImage(imageFileName + i + "_movement.png"); // replace noData with image
+    mapMovement[i] = new movementPath(img(i + "_movement.png"), true);
+    mapTalk[i] = img(i + "_talk.png");
 
-    mapMovement[i] = path;
-
-    block = loadImage(imageFileName + i + "_talk.png");
-    mapTalk[i] = block;
-
-    if (i == 2 || i == 3 || i == 4 || i == 12) { // for people who did not curate push integer
+    if (noCurationIndividuals.indexOf(i) !== -1) {
         mapCuration[i] = 1;
-        mapZoomCuration[i] = 1;
     } else {
-        if (i == 0 || i == 5) { // no walkway curation
-            curPathZoom = new movementZoom(1, loadImage(imageFileName + i + "_bluegrassCuration.png"), loadImage(imageFileName + i + "_rotundaCuration.png"));
-        } else if (i == 1) { // only rotunda curation
-            curPathZoom = new movementZoom(1, 1, loadImage(imageFileName + i + "_rotundaCuration.png"));
-        } else if (i == 7) { // no bluegrass curation
-            curPathZoom = new movementZoom(loadImage(imageFileName + i + "_walkwayCuration.png"), 1, loadImage(imageFileName + i + "_rotundaCuration.png"));
-        } else if (i == 8 || i == 14) { // only bluegrass curation
-            curPathZoom = new movementZoom(1, loadImage(imageFileName + i + "_bluegrassCuration.png"), 1);
-        } else if (i == 6 || i == 11 || i == 13) { // no rotunda curation
-            curPathZoom = new movementZoom(loadImage(imageFileName + i + "_walkwayCuration.png"), loadImage(imageFileName + i + "_bluegrassCuration.png"), 1);
-        } else if (i == 9 || i == 10) { // show all
-            curPathZoom = new movementZoom(loadImage(imageFileName + i + "_walkwayCuration.png"), loadImage(imageFileName + i + "_bluegrassCuration.png"), loadImage(imageFileName + i + "_rotundaCuration.png"));
-        }
-
-        curPath = loadImage(imageFileName + i + "_curation.png");
-        mapCuration[i] = curPath;
-        mapZoomCuration[i] = curPathZoom;
+        mapCuration[i] = img(i + "_curation.png");
     }
+}
+
+function loadZoomCuration(i) {
+    // Per-individual curation availability by space:
+    //   walkway: not 0, 1, 5, 8, 14
+    //   bluegrass: not 1, 7
+    //   rotunda: not 6, 8, 11, 13, 14
+    var curationMap = {
+        0:  [1,    'bg', 'rot'],
+        1:  [1,    1,    'rot'],
+        5:  [1,    'bg', 'rot'],
+        6:  ['wk', 'bg', 1],
+        7:  ['wk', 1,    'rot'],
+        8:  [1,    'bg', 1],
+        9:  ['wk', 'bg', 'rot'],
+        10: ['wk', 'bg', 'rot'],
+        11: ['wk', 'bg', 1],
+        13: ['wk', 'bg', 1],
+        14: [1,    'bg', 1]
+    };
+
+    var spaceNames = { wk: 'walkway', bg: 'bluegrass', rot: 'rotunda' };
+    var entry = curationMap[i];
+    if (!entry) return;
+
+    var spaces = entry.map(function(s) {
+        return s === 1 ? 1 : img(i + "_" + spaceNames[s] + "Curation.png");
+    });
+    mapZoomCuration[i] = new movementZoom(spaces[0], spaces[1], spaces[2]);
 }
 
 function loadDataZoom(i) {
-    var pathZoom;
-    var blockZoom;
-    // for BG mom and Swift family there is no rotunda image 
-    if (i == 3 || i > 10) {
-        pathZoom = new movementZoom(loadImage(imageFileName + i + "_walkway.png"), loadImage(imageFileName + i + "_bluegrass.png"), 1, false, false, false);
-        blockZoom = new movementZoom(loadImage(imageFileName + i + "_walkwayTalk.png"), loadImage(imageFileName + i + "_bluegrassTalk.png"), 1);
+    var hasRotunda = noRotundaIndividuals.indexOf(i) === -1;
+    var rotundaMovement = hasRotunda ? img(i + "_rotunda.png") : 1;
+    var rotundaTalk = hasRotunda ? img(i + "_rotundaTalk.png") : 1;
+
+    mapZoomMovement[i] = new movementZoom(
+        img(i + "_walkway.png"), img(i + "_bluegrass.png"), rotundaMovement,
+        false, false, false
+    );
+    mapZoomTalk[i] = new movementZoom(
+        img(i + "_walkwayTalk.png"), img(i + "_bluegrassTalk.png"), rotundaTalk
+    );
+
+    if (noCurationIndividuals.indexOf(i) !== -1) {
+        mapZoomCuration[i] = 1;
     } else {
-        pathZoom = new movementZoom(loadImage(imageFileName + i + "_walkway.png"), loadImage(imageFileName + i + "_bluegrass.png"), loadImage(imageFileName + i + "_rotunda.png"), false, false, false);
-        blockZoom = new movementZoom(loadImage(imageFileName + i + "_walkwayTalk.png"), loadImage(imageFileName + i + "_bluegrassTalk.png"), loadImage(imageFileName + i + "_rotundaTalk.png"));
+        loadZoomCuration(i);
     }
-    mapZoomMovement[i] = pathZoom;
-    mapZoomTalk[i] = blockZoom;
 }
 
 function loadDataConversation(i) {
-    var conversation = new Conversation(loadStrings(imageFileName + i + "_conversation.txt"), loadImage(imageFileName + i + "_conversationBox.png"), loadImage(imageFileName + i + "_conversationBoxZoom.png"), loadSound("audio/" + i + "_conversationAudio.mp3"));
-    mapConversation[i] = conversation;
+    mapConversation[i] = new Conversation(
+        loadStrings(imageFileName + i + "_conversation.txt"),
+        img(i + "_conversationBox.png"),
+        img(i + "_conversationBoxZoom.png"),
+        loadSound("audio/" + i + "_conversationAudio.mp3")
+    );
 }
 
-
 function loadBaseImages() {
-    baseGrid_2 = loadImage(imageFileName + "baseGrid_2.png");
-    baseGrid_3 = loadImage(imageFileName + "baseGrid_3.png");
-    grid_Bluegrass = loadImage(imageFileName + "grid_Bluegrass.png");
-    // load above first
-    grid_Walkway = loadImage(imageFileName + "grid_Walkway.png");
-    grid_Rotunda = loadImage(imageFileName + "grid_Rotunda.png");
+    baseGrid_2 = img("baseGrid_2.png");
+    baseGrid_3 = img("baseGrid_3.png");
+    grid_Bluegrass = img("grid_Bluegrass.png");
+    grid_Walkway = img("grid_Walkway.png");
+    grid_Rotunda = img("grid_Rotunda.png");
 
-    plan_Walkway = loadImage(imageFileName + "plan_Walkway.png");
-    plan_Bluegrass = loadImage(imageFileName + "plan_Bluegrass.png");
-    plan_Rotunda = loadImage(imageFileName + "plan_Rotunda.png");
-    grayScale = loadImage(imageFileName + "grayScale.png");
-    allConversationBoxes = loadImage(imageFileName + "allConversationBoxes.png");
-    conversationBoxes_00 = loadImage(imageFileName + "conversationBoxes_00.png");
-    conversationBoxes_01 = loadImage(imageFileName + "conversationBoxes_01.png");
-    conversationBoxes_02 = loadImage(imageFileName + "conversationBoxes_02.png");
-    conversationBoxes_03 = loadImage(imageFileName + "conversationBoxes_03.png");
-    conversationBoxes_10 = loadImage(imageFileName + "conversationBoxes_10.png");
-    conversationBoxes_11 = loadImage(imageFileName + "conversationBoxes_11.png");
-    conversationBoxes_12 = loadImage(imageFileName + "conversationBoxes_12.png");
-    conversationBoxes_13 = loadImage(imageFileName + "conversationBoxes_13.png");
-    conversationBoxes_20 = loadImage(imageFileName + "conversationBoxes_20.png");
-    conversationBoxes_21 = loadImage(imageFileName + "conversationBoxes_21.png");
-    conversationBoxes_22 = loadImage(imageFileName + "conversationBoxes_22.png");
-    grayScale_00 = loadImage(imageFileName + "grayScale_00.png");
-    grayScale_01 = loadImage(imageFileName + "grayScale_01.png");
-    grayScale_02 = loadImage(imageFileName + "grayScale_02.png");
-    grayScale_03 = loadImage(imageFileName + "grayScale_03.png");
-    grayScale_10 = loadImage(imageFileName + "grayScale_10.png");
-    grayScale_11 = loadImage(imageFileName + "grayScale_11.png");
-    grayScale_12 = loadImage(imageFileName + "grayScale_12.png");
-    grayScale_13 = loadImage(imageFileName + "grayScale_13.png");
-    grayScale_20 = loadImage(imageFileName + "grayScale_20.png");
-    grayScale_21 = loadImage(imageFileName + "grayScale_21.png");
-    grayScale_22 = loadImage(imageFileName + "grayScale_22.png");
+    plan_Walkway = img("plan_Walkway.png");
+    plan_Bluegrass = img("plan_Bluegrass.png");
+    plan_Rotunda = img("plan_Rotunda.png");
+    grayScale = img("grayScale.png");
+    allConversationBoxes = img("allConversationBoxes.png");
+
+    conversationBoxes_00 = img("conversationBoxes_00.png");
+    conversationBoxes_01 = img("conversationBoxes_01.png");
+    conversationBoxes_02 = img("conversationBoxes_02.png");
+    conversationBoxes_03 = img("conversationBoxes_03.png");
+    conversationBoxes_10 = img("conversationBoxes_10.png");
+    conversationBoxes_11 = img("conversationBoxes_11.png");
+    conversationBoxes_12 = img("conversationBoxes_12.png");
+    conversationBoxes_13 = img("conversationBoxes_13.png");
+    conversationBoxes_20 = img("conversationBoxes_20.png");
+    conversationBoxes_21 = img("conversationBoxes_21.png");
+    conversationBoxes_22 = img("conversationBoxes_22.png");
+
+    grayScale_00 = img("grayScale_00.png");
+    grayScale_01 = img("grayScale_01.png");
+    grayScale_02 = img("grayScale_02.png");
+    grayScale_03 = img("grayScale_03.png");
+    grayScale_10 = img("grayScale_10.png");
+    grayScale_11 = img("grayScale_11.png");
+    grayScale_12 = img("grayScale_12.png");
+    grayScale_13 = img("grayScale_13.png");
+    grayScale_20 = img("grayScale_20.png");
+    grayScale_21 = img("grayScale_21.png");
+    grayScale_22 = img("grayScale_22.png");
 }
 
 function positionButtons() {
-    // Conversation button positions
-    yPosWalkway = height / 2.5;
-    yPosBluegrass = height / 1.56;
-    yPosRotunda = height / 1.075;
-    xPosButtonBluegrass = width / 6.2;
-    xPosButtonGayle = width / 2.475;
-    xPosButtonBusiness = width / 1.58;
-    xPosButtonMom = width / 1.19;
-
-    // Timeline scaling
     timelineStartWalkway = width / 2.45;
     timelineStartBluegrass = width / 2.83;
     timelineStartRotunda = width / 1.81;
@@ -280,21 +256,17 @@ window._igsWelcomeDismiss = function() {
 };
 
 // Bridge: expose p5 functions for Svelte store to call
-window._igsIndividualDisplay = function(i) {
-    individualDisplay(i);
-};
-window._igsSpaceSelect = function(space) {
-    spaceSelect(space);
-};
-window._igsFamilyHighlight = function(start, end) {
-    familyHighlight(start, end);
-};
-window._igsZoomSelect = function(index) {
-    zoomSelect(index);
-};
-window._igsResetTransition = function() {
-    resetTransition();
-};
-window._igsResetReveal = function() {
-    reveal = 0;
+window._igsIndividualDisplay = function(i) { individualDisplay(i); };
+window._igsSpaceSelect = function(space) { spaceSelect(space); };
+window._igsFamilyHighlight = function(start, end) { familyHighlight(start, end); };
+window._igsZoomSelect = function(index) { zoomSelect(index); };
+window._igsResetTransition = function() { resetTransition(); };
+window._igsResetReveal = function() { reveal = 0; };
+window._igsEnsureZoomData = function() {
+    for (var i = 0; i < individualLength; i++) {
+        if (mapMovement[i].show && mapZoomMovement[i] === -1) {
+            loadDataZoom(i);
+        }
+    }
+    spaceSelect(displaySpace);
 };

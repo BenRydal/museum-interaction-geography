@@ -99,6 +99,9 @@ export function setView(view: ViewMode) {
 	if (view === 'smallMultiple') {
 		// When exiting zoom, show all individuals (like overZoomExitButton)
 		(window as any)._igsFamilyHighlight?.(0, 14);
+	} else if (view === 'zoom') {
+		// Lazy-load zoom images for any individuals that were loaded in small multiple view
+		(window as any)._igsEnsureZoomData?.();
 	}
 	syncToWindow();
 }
@@ -128,6 +131,7 @@ export function resetAll() {
 
 export function zoomInto(index: number) {
 	state.view = 'zoom';
+	(window as any)._igsEnsureZoomData?.();
 	(window as any)._igsZoomSelect?.(index);
 	syncToWindow();
 	// Read back family/space that p5 set

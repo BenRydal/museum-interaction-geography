@@ -20,7 +20,7 @@ function zoomSelect(select) {
 // Hides individuals outside the selected family range
 function familySelect(start, end) {
     for (var i = 0; i < individualLength; i++) {
-        if ((i < start || i > end) && mapMovement[i].show == true) individualDisplay(i);
+        if ((i < start || i > end) && mapMovement[i].show) individualDisplay(i);
     }
 }
 
@@ -28,8 +28,9 @@ function familySelect(start, end) {
 function familyHighlight(start, end) {
     resetTransition();
     for (var i = 0; i < individualLength; i++) {
-        if ((i >= start && i <= end) && mapMovement[i].show == false) individualDisplay(i);
-        else if ((i < start || i > end) && mapMovement[i].show == true) individualDisplay(i);
+        var inRange = i >= start && i <= end;
+        if (inRange && !mapMovement[i].show) individualDisplay(i);
+        else if (!inRange && mapMovement[i].show) individualDisplay(i);
     }
 }
 
@@ -38,6 +39,7 @@ function spaceSelect(space) {
     displaySpace = space;
     resetTransition();
     for (var i = 0; i < individualLength; i++) {
+        if (mapZoomMovement[i] === -1) continue;
         mapZoomMovement[i].selectWalkway = (space == 0);
         mapZoomMovement[i].selectBluegrass = (space == 1);
         mapZoomMovement[i].selectRotunda = (space == 2);
@@ -46,34 +48,14 @@ function spaceSelect(space) {
 
 // Toggles an individual's visibility, loading data on first display
 function individualDisplay(number) {
-    if (mapMovement[number].movement !== -1 && mapMovement[number] !== undefined && mapMovement[number] !== null) {
+    if (mapMovement[number].movement !== -1) {
         mapMovement[number].show = !mapMovement[number].show;
     } else {
-        loadDataZoom(number);
         loadDataSmallMultiple(number);
+        if (zoomView) {
+            loadDataZoom(number);
+        }
         spaceSelect(displaySpace);
-    }
-}
-
-// Sets conversation button X/Y positions based on space index
-function findSpace(space) {
-    var spaceMap = {
-        0: [xPosButtonBluegrass, yPosWalkway],
-        10: [xPosButtonBluegrass, yPosBluegrass],
-        30: [xPosButtonBluegrass, yPosRotunda],
-        39: [xPosButtonGayle, yPosWalkway],
-        58: [xPosButtonGayle, yPosBluegrass],
-        67: [xPosButtonGayle, yPosRotunda],
-        72: [xPosButtonBusiness, yPosWalkway],
-        83: [xPosButtonBusiness, yPosBluegrass],
-        85: [xPosButtonBusiness, yPosRotunda],
-        86: [xPosButtonMom, yPosWalkway],
-        90: [xPosButtonMom, yPosBluegrass]
-    };
-    var pos = spaceMap[space];
-    if (pos) {
-        conversationButtonX = pos[0];
-        conversationButtonY = pos[1];
     }
 }
 
@@ -84,13 +66,9 @@ function setUpAnimation() {
 
 // Draws fade transition with the correct floor plan image
 function transition() {
-    var xPos = fullScreenTransition ? 0 : 50;
-    var yPos = fullScreenTransition ? 0 : 110;
-    if (fullScreenTransition) fullScreenTransition = false;
-
     noStroke();
     fill(255, fillColor);
-    rect(xPos, yPos, width, height);
+    rect(50, 110, width, height);
     fillColor -= 25;
 
     if (zoomView) {
