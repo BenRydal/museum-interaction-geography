@@ -2,6 +2,8 @@
 	import { onMount } from 'svelte';
 	import { appState, toggleIndividual, setFamily } from '$lib/stores/appState.svelte';
 
+	let { navbarHeight = 0 }: { navbarHeight?: number } = $props();
+
 	// Track which individuals are showing by reading p5 state
 	let showing = $state(Array(15).fill(false));
 
@@ -47,8 +49,6 @@
 	}
 
 	const nameGap = $derived(w / 30);
-	// Ensure toggles stay below the navbar (~44px tall)
-	const navbarHeight = 44;
 	const headerY = $derived(Math.max(h * 0.058, navbarHeight + 4));
 	const nameY = $derived(Math.max(h * 0.08, navbarHeight + 22));
 

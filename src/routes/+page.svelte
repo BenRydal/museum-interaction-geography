@@ -4,7 +4,6 @@
 	import WelcomeOverlay from '$lib/components/welcome/WelcomeOverlay.svelte';
 	import HeaderOverlay from '$lib/components/controls/HeaderOverlay.svelte';
 	import ModeSelector from '$lib/components/controls/ModeSelector.svelte';
-
 	import AnimationToggle from '$lib/components/controls/AnimationToggle.svelte';
 	import AboutButton from '$lib/components/controls/AboutButton.svelte';
 	import ViewToggle from '$lib/components/controls/ViewToggle.svelte';
@@ -15,6 +14,7 @@
 	import { panelState, setPanelVisible } from '$lib/stores/conversationPanel.svelte';
 
 	let ready = $state(false);
+	let navbarHeight = $state(0);
 
 	onMount(() => {
 		setupBridge();
@@ -57,10 +57,10 @@
 {#if ready}
 
 <!-- Header overlay: family headers, individual names, gallery labels, grid lines -->
-<HeaderOverlay />
+<HeaderOverlay {navbarHeight} />
 
 <!-- Navbar: mode selector centered, utility buttons on the right -->
-<nav class="pointer-events-auto fixed top-0 right-0 left-0 z-50 flex items-center justify-center border-b border-gray-200 bg-white/90 px-3 py-1.5 backdrop-blur-sm">
+<nav bind:clientHeight={navbarHeight} class="pointer-events-auto fixed top-0 right-0 left-0 z-50 flex items-center justify-center border-b border-gray-200 bg-white/90 px-3 py-1.5 backdrop-blur-sm">
 	<div class="flex items-center gap-2">
 		<ModeSelector />
 		{#if appState.view === 'zoom'}

@@ -3,6 +3,8 @@
 	import { appState, setSpace } from '$lib/stores/appState.svelte';
 	import IndividualToggles from './IndividualToggles.svelte';
 
+	let { navbarHeight = 0 }: { navbarHeight?: number } = $props();
+
 	let w = $state(0);
 	let h = $state(0);
 
@@ -18,9 +20,9 @@
 	});
 
 	const galleries = [
-		{ name: 'FOLK ROOTS GALLERY', spaceId: 0 },
-		{ name: 'BLUEGRASS GALLERY', spaceId: 1 },
-		{ name: 'ROTUNDA GALLERY', spaceId: 2 }
+		{ name: 'FOLK ROOTS', spaceId: 0 },
+		{ name: 'BLUEGRASS', spaceId: 1 },
+		{ name: 'ROTUNDA', spaceId: 2 }
 	];
 
 	// Gallery label Y center positions (centered in each gallery section)
@@ -35,7 +37,7 @@
 {#if w > 0}
 <div class="pointer-events-none fixed inset-0 z-40" style="font-family: 'Playfair Display', serif;">
 	<!-- Individual toggles with family headers -->
-	<IndividualToggles />
+	<IndividualToggles {navbarHeight} />
 
 	<!-- Vertical guide lines (matching original baseGrid.png) -->
 	<div

@@ -33,7 +33,7 @@ Four JavaScript files loaded via `<script>` tags in `index.html`:
 
 **Three modes**: Movement, Talk, and Curation — toggled via mode buttons (top-right). Each mode displays different data overlays for the selected individuals.
 
-**Data per individual (0-14)**: Movement paths, talk blocks, and curation data are loaded as pre-rendered PNG images from `images/` (high-res) or `lowImages/` (low-res, selected when `windowWidth <= 900`).
+**Data per individual (0-14)**: Movement paths, talk blocks, and curation data are loaded as pre-rendered PNG images from `images/` (2880x1800, desktop) or `small-images/` (1440x900, selected when `windowWidth <= 900`). Zoom-specific images are lazy-loaded only when entering zoom view to reduce memory pressure on mobile.
 
 **106 conversations**: Each has a transcript `.txt`, a conversation box `.png`, and an audio `.mp3` in `audio/`.
 
