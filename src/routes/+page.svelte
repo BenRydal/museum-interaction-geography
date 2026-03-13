@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { appState, setupBridge, syncState, setWelcome } from '$lib/stores/appState.svelte';
+	import { appState, setupBridge, syncState, setWelcome, setAnimate } from '$lib/stores/appState.svelte';
 	import WelcomeOverlay from '$lib/components/welcome/WelcomeOverlay.svelte';
 	import HeaderOverlay from '$lib/components/controls/HeaderOverlay.svelte';
 	import ModeSelector from '$lib/components/controls/ModeSelector.svelte';
@@ -48,11 +48,20 @@
 		syncState();
 	});
 
+	function handleKeydown(e: KeyboardEvent) {
+		if (e.code === 'Space' && !(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
+			e.preventDefault();
+			setAnimate(!appState.animate);
+		}
+	}
+
 	function dismissWelcome() {
 		setWelcome(false);
 		(window as any)._igsWelcomeDismiss();
 	}
 </script>
+
+<svelte:window onkeydown={handleKeydown} />
 
 {#if ready}
 
